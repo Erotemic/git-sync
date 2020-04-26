@@ -1,12 +1,10 @@
 The git_sync Module
 ===================
 
-|CircleCI| |Travis| |Appveyor| |Codecov| |Pypi| |Downloads| |ReadTheDocs|
+|CircleCI| |Travis| |Codecov| |Pypi| |Downloads| 
 
 The ``git_sync`` module.
 
-+------------------+----------------------------------------------+
-| Read the docs    | https://git_sync.readthedocs.io              |
 +------------------+----------------------------------------------+
 | Github           | https://github.com/Erotemic/git_sync         |
 +------------------+----------------------------------------------+
@@ -26,7 +24,10 @@ changes reflected on the remote machine, you execute
 git-sync other-machine
 ```
 
-This performs the following actions:
+Details
+-------
+
+Executing `git-sync` performs the following actions:
 
 1. Executes a git commit to the local repo (the default commit message is "wip",
    but this can be changed using the -m flag). 
@@ -43,6 +44,9 @@ This performs the following actions:
    state. 
 
 
+Caveats
+-------
+
 Note that this script is very simple, it will fail if these conditions aren't met.
 
 * The location of the repo (relative to the home directory) must be the same on
@@ -52,6 +56,50 @@ Note that this script is very simple, it will fail if these conditions aren't me
 * The repo on the local machine and remote machine must be on the same branch.
 
 * The repo on the remote machine must be in a clean state.
+
+
+On SSH Configs
+--------------
+
+Also, to make life easier, it is best that you have a $HOME/.ssh/config file
+setup with the remote machines you to access and appropriate identify files so
+you don't need to enter your password each time you `git-sync`.
+
+An example ssh config entry is:
+
+.. code:: 
+
+    Host {myremote} {myremote.com}
+        HostName {myremote.com}
+        Port 22
+        User {username}
+        identityfile ~/.ssh/{my_id_ed25519}
+
+Replacing any entry in `{curly braces}` with an appropriate value. 
+
+
+If you don't have an ssh identify file, create one using:
+
+.. code:: 
+
+    mkdir -p $HOME/.ssh
+    cd $HOME/.ssh
+
+    FPATH="$HOME/.ssh/my_id_ed25519"
+    ssh-keygen -t ed25519 -b 256 -C "${EMAIL}" -f $FPATH -N ""
+
+    chmod 700 ~/.ssh
+    chmod 400 ~/.ssh/id_*
+    chmod 644 ~/.ssh/id_*.pub
+
+
+And ensure the public key is registered with the remote machine:
+
+.. code:: 
+
+    REMOTE={myremote.com}
+    REMOTE_USER={myusername}
+    ssh-copy-id $REMOTE_USER@$REMOTE
 
 
 .. |Pypi| image:: https://img.shields.io/pypi/v/git_sync.svg
