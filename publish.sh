@@ -228,6 +228,7 @@ if [[ "$TAG_AND_UPLOAD" == "yes" ]]; then
     check_variable TWINE_USERNAME
     check_variable TWINE_PASSWORD "hide"
 
+    # VERSION=$(python -c "import setup; print(setup.VERSION)")
     #git tag $VERSION -m "tarball tag $VERSION"
     #git push --tags $DEPLOY_REMOTE $DEPLOY_BRANCH
 
