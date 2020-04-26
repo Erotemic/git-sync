@@ -20,27 +20,27 @@ Assuming that you have the same file structure on both your local and remote
 machine, `git-sync` allows you to edit files locally, and when you want those 
 changes reflected on the remote machine, you execute 
 
-```bash
-git-sync other-machine
-```
+.. code:: 
+
+    git-sync other-machine
 
 Details
 -------
 
-Executing `git-sync` performs the following actions:
+Executing ``git-sync`` performs the following actions:
 
 1. Executes a git commit to the local repo (the default commit message is "wip",
    but this can be changed using the -m flag). 
 
-2. Executes a `git push origin` which pushes the local copy of the repo to the
+2. Executes a ``git push origin`` which pushes the local copy of the repo to the
    git server. (Note, git-sync defaults to the origin git remote, but you can
    specify a different one using a second positional argument: e.g. 
-   `git-sync other-machine remote2`).
+   ``git-sync other-machine remote2``).
 
 3. Creates an SSH connection to "other-machine", cd's into the same directory
    you are in on the local machine (which is why mirroring the directory
    structure across development machines is important), and then executes a
-   `git pull origin`, which will update the remote machine to the newly pushed
+   ``git pull origin``, which will update the remote machine to the newly pushed
    state. 
 
 
@@ -63,7 +63,7 @@ On SSH Configs
 
 Also, to make life easier, it is best that you have a $HOME/.ssh/config file
 setup with the remote machines you to access and appropriate identify files so
-you don't need to enter your password each time you `git-sync`.
+you don't need to enter your password each time you ``git-sync``.
 
 An example ssh config entry is:
 
@@ -75,7 +75,7 @@ An example ssh config entry is:
         User {username}
         identityfile ~/.ssh/{my_id_ed25519}
 
-Replacing any entry in `{curly braces}` with an appropriate value. 
+Replacing any entry in ``{curly braces}`` with an appropriate value. 
 
 
 If you don't have an ssh identify file, create one using:
