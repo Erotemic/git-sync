@@ -1,7 +1,7 @@
 The git_sync Module
 ===================
 
-|CircleCI| |Travis| |Codecov| |Pypi| |Downloads| 
+|Travis| |Codecov| |Pypi| |Downloads| 
 
 The ``git_sync`` module.
 
