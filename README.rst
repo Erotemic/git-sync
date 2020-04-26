@@ -24,6 +24,16 @@ changes reflected on the remote machine, you execute
 
     git-sync other-machine
 
+Installation
+------------
+
+Installing the git_sync Python module also installs the ``git-sync`` command line utility.
+
+.. code:: 
+
+    pip install git-sync
+
+
 Details
 -------
 
