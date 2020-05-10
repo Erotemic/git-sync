@@ -24,6 +24,12 @@ changes reflected on the remote machine, you execute
 
     git-sync other-machine
 
+
+Note, that **this creates a commit** with the message "wip" and pushes it to
+the default git-remote. The commit message and target git-remote can be
+modified by command line args.
+
+
 Installation
 ------------
 
@@ -110,6 +116,14 @@ And ensure the public key is registered with the remote machine:
     REMOTE={myremote.com}
     REMOTE_USER={myusername}
     ssh-copy-id $REMOTE_USER@$REMOTE
+
+
+Similar Software
+----------------
+
+* `CFarm  <https://github.com/robertmaynard/cfarm>`__ is a tool for keeping remotes in sync and testing code on the remote machines. 
+
+* `Visual Studio Code <https://code.visualstudio.com/>`__ has great remote ssh and developing support. 
 
 
 .. |Pypi| image:: https://img.shields.io/pypi/v/git_sync.svg
