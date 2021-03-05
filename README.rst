@@ -142,7 +142,7 @@ Similar Software
 .. |CircleCI| image:: https://circleci.com/gh/Erotemic/git_sync.svg?style=svg
     :target: https://circleci.com/gh/Erotemic/git_sync
 
-.. |Travis| image:: https://travis-ci.org/Erotemic/git-sync.svg?branch=master&status=passed
+.. |Travis| image:: https://travis-ci.org/Erotemic/git-sync.svg?branch=master
    :target: https://travis-ci.org/Erotemic/git_sync
 
 .. |Codecov| image:: https://codecov.io/github/Erotemic/git_sync/badge.svg?branch=master&service=github

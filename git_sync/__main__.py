@@ -30,7 +30,22 @@ def _getcwd():
     return canidate1
 
 
-def git_sync(host, remote=None, message='wip', forward_ssh_agent=False, dry=False):
+def git_default_push_remote_name():
+    local_remotes = ub.cmd('git remote -v')['out'].strip()
+    lines = [line for line in local_remotes.split('\n') if line]
+    candidates = []
+    for line in lines:
+        parts = line.split('\t')
+        remote_name, remote_url_type = parts
+        if remote_url_type.endswith('(push)'):
+            candidates.append(remote_name)
+    if len(candidates) == 1:
+        remote_name = candidates[0]
+    return remote_name
+
+
+def git_sync(host, remote=None, message='wip', forward_ssh_agent=False,
+             dry=False, force=False):
     """
     Commit any changes in the current working directory, ssh into a remote
     machine, and then pull those changes.
@@ -48,6 +63,10 @@ def git_sync(host, remote=None, message='wip', forward_ssh_agent=False, dry=Fals
         forward_ssh_agent (bool):
             Enable forwarding of the ssh authentication agent connection
 
+        force (bool, default=False):
+            if True does a forced push and additionally forces the remote to do
+            a hard reset to the remote state.
+
         dry (bool, default=False):
             Executes dry run mode.
 
@@ -61,31 +80,110 @@ def git_sync(host, remote=None, message='wip', forward_ssh_agent=False, dry=Fals
         ssh user@remote.com "cd ... && git pull origin"
     """
     cwd = _getcwd()
-    relpwd = relpath(cwd, expanduser('~'))
+    relcwd = relpath(cwd, expanduser('~'))
 
-    parts = [
-        'git commit -am "{}"'.format(message),
+    """
+    # How to check if a branch exists
+    git branch --list ${branch}
+
+    # Get current branch name
+
+    if [[ "$(git rev-parse --abbrev-ref HEAD)" != "{branch}" ]];
+        then git checkout {branch} ;
+    fi
+
+    # git rev-parse --abbrev-ref HEAD
+    if [[ -z $(git branch --list ${branch}) ]]; then
+    else
+    fi
+    """
+
+    # $(git branch --list ${branch})
+
+    # Assume the remote directory is the same as the local one (relative to home)
+    remote_cwd = relcwd
+
+    # Build one command to execute on the remote
+    remote_parts = [
+        'cd {remote_cwd}',
     ]
 
-    if remote:
-        parts += [
-            'git push {remote}',
-            'ssh {host} "cd {relpwd} && git pull {remote}"'
+    # Get branch name from the local
+    local_branch_name = ub.cmd('git rev-parse --abbrev-ref HEAD')['out'].strip()
+    # Assume the branches are the same between local / remote
+    remote_branch_name = local_branch_name
+
+    if force:
+        if remote is None:
+            # FIXME: might not work in all cases
+            remote = git_default_push_remote_name()
+
+        # Force the remote to the state of the remote
+        remote_checkout_branch_force = ub.paragraph(
+            '''
+            git fetch {remote};
+            if [[ "$(git rev-parse --abbrev-ref HEAD)" != "{branch}" ]]; then
+                git checkout {branch};
+            fi;
+            git reset {remote}/{branch} --hard
+            ''').format(
+                remote=remote,
+                branch=remote_branch_name
+            )
+
+        remote_parts += [
+            'git fetch {remote}',
+            remote_checkout_branch_force.replace('"', r'\"'),
         ]
     else:
-        parts += [
-            'git push',
-            'ssh {ssh_flags} {host} "cd {relpwd} && git pull"'
+        # ensure the remote is on the right branch
+        # (this assumes no conflicts and will fail if anything bad
+        #  might happen)
+        remote_checkout_branch_simple = ub.paragraph(
+            r'''
+            if [[ "$(git rev-parse --abbrev-ref HEAD)" != "{branch}" ]]; then
+                git checkout {branch};
+            fi
+            ''').format(branch=local_branch_name)
+
+        remote_parts += [
+            'git pull {remote}' if remote else 'git pull',
+            remote_checkout_branch_simple.replace('"', r'\"'),
         ]
+
+    remote_part = ' && '.join(remote_parts)
+
+    # Build one comand to execute locally
+    commit_command = 'git commit -am "{}"'.format(message)
+
+    push_args = ['git push']
+    if remote:
+        push_args.append('{remote}')
+    if force:
+        push_args.append('--force')
+    push_command = ' '.join(push_args)
+
+    sync_command = 'ssh {ssh_flags} {host} "' + remote_part + '"'
+
+    local_parts = [
+        commit_command,
+        push_command,
+        sync_command,
+    ]
 
     ssh_flags = []
     if forward_ssh_agent:
         ssh_flags += ['-A']
     ssh_flags = ' '.join(ssh_flags)
 
-    kw = dict(host=host, relpwd=relpwd, remote=remote, ssh_flags=ssh_flags)
+    kw = dict(
+        host=host,
+        remote_cwd=remote_cwd,
+        remote=remote,
+        ssh_flags=ssh_flags
+    )
 
-    for part in parts:
+    for part in local_parts:
         command = part.format(**kw)
         if not dry:
             result = ub.cmd(command, verbose=2)
@@ -111,6 +209,8 @@ def main():
                         help='Perform a dry run')
     parser.add_argument(*('-m', '--message'), type=str,
                         help='Specify a custom commit message')
+    parser.add_argument('--force', default=False, action='store_true',
+                        help='Force push and hard reset the remote.')
 
     parser.set_defaults(
         dry=False,
