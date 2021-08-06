@@ -71,6 +71,7 @@ def git_sync(host, remote=None, message='wip', forward_ssh_agent=False,
             Executes dry run mode.
 
     Example:
+        >>> # xdoctest: +SKIP
         >>> host = 'user@remote.com'
         >>> remote = 'origin'
         >>> message = 'this is the commit message'
