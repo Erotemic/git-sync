@@ -6,9 +6,9 @@ The git_sync Module
 The ``git_sync`` module.
 
 +------------------+----------------------------------------------+
-| Github           | https://github.com/Erotemic/git_sync         |
+| Github           | https://github.com/Erotemic/git-sync         |
 +------------------+----------------------------------------------+
-| Pypi             | https://pypi.org/project/git_sync            |
+| Pypi             | https://pypi.org/project/git-sync            |
 +------------------+----------------------------------------------+
 
 
