@@ -15,6 +15,9 @@ def _getcwd():
 
     References:
         https://stackoverflow.com/questions/1542803/getcwd-dereference-symlinks
+
+    Example:
+        >>> _getcwd()
     """
     # TODO: use ubelt version if it lands
     canidate1 = os.getcwd()
