@@ -44,7 +44,7 @@ def git_default_push_remote_name():
     return remote_name
 
 
-def git_sync(host, remote=None, message='wip', forward_ssh_agent=False,
+def git_sync(host, remote=None, message='wip [skip ci]', forward_ssh_agent=False,
              dry=False, force=False):
     """
     Commit any changes in the current working directory, ssh into a remote
@@ -57,7 +57,7 @@ def git_sync(host, remote=None, message='wip', forward_ssh_agent=False,
         remote (str):
             The git remote used to push and pull from
 
-        message (str, default='wip'):
+        message (str, default='wip [skip ci]'):
             Default git commit message.
 
         forward_ssh_agent (bool):
@@ -215,7 +215,7 @@ def main():
     parser.set_defaults(
         dry=False,
         remote=None,
-        message='wip',
+        message='wip [skip ci]',
     )
     args = parser.parse_args()
     ns = args.__dict__.copy()
