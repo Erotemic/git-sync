@@ -77,7 +77,7 @@ def git_sync(host, remote=None, message='wip [skip ci]', forward_ssh_agent=False
         >>> git_sync(host, remote, message, dry=True)
         git commit -am "this is the commit message"
         git push origin
-        ssh user@remote.com "cd ... && git pull origin"
+        ssh user@remote.com "cd ... && git pull origin ..."
     """
     cwd = _getcwd()
     relcwd = relpath(cwd, expanduser('~'))
