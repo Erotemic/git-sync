@@ -126,20 +126,20 @@ Similar Software
 * `Visual Studio Code <https://code.visualstudio.com/>`__ has great remote ssh and developing support. 
 
 
-.. |CircleCI| image:: https://circleci.com/gh/Erotemic/git_sync.svg?style=svg
-    :target: https://circleci.com/gh/Erotemic/git_sync
+.. |CircleCI| image:: https://circleci.com/gh/Erotemic/git-sync.svg?style=svg
+    :target: https://circleci.com/gh/Erotemic/git-sync
 
-.. |Codecov| image:: https://codecov.io/github/Erotemic/git_sync/badge.svg?branch=main&service=github
-   :target: https://codecov.io/github/Erotemic/git_sync?branch=main
+.. |Codecov| image:: https://codecov.io/github/Erotemic/git-sync/badge.svg?branch=main&service=github
+   :target: https://codecov.io/github/Erotemic/git-sync?branch=main
 
-.. |Pypi| image:: https://img.shields.io/pypi/v/git_sync.svg
-   :target: https://pypi.python.org/pypi/git_sync
+.. |Pypi| image:: https://img.shields.io/pypi/v/git-sync.svg
+   :target: https://pypi.python.org/pypi/git-sync
 
-.. |Downloads| image:: https://img.shields.io/pypi/dm/git_sync.svg
-   :target: https://pypistats.org/packages/git_sync
+.. |Downloads| image:: https://img.shields.io/pypi/dm/git-sync.svg
+   :target: https://pypistats.org/packages/git-sync
 
-.. |ReadTheDocs| image:: https://readthedocs.org/projects/git_sync/badge/?version=latest
-    :target: http://git_sync.readthedocs.io/en/latest/
+.. |ReadTheDocs| image:: https://readthedocs.org/projects/git-sync/badge/?version=latest
+    :target: http://git-sync.readthedocs.io/en/latest/
 
-.. |GithubActions| image:: https://github.com/Erotemic/git_sync/actions/workflows/tests.yml/badge.svg?branch=main
-    :target: https://github.com/Erotemic/git_sync/actions?query=branch%3Amain
+.. |GithubActions| image:: https://github.com/Erotemic/git-sync/actions/workflows/tests.yml/badge.svg?branch=main
+    :target: https://github.com/Erotemic/git-sync/actions?query=branch%3Amain
