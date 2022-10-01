@@ -1,7 +1,6 @@
 The git_sync Module
 ===================
 
-.. |Travis| |Codecov| |Pypi| |Downloads| 
 |GithubActions| |ReadTheDocs| |Pypi| |Downloads| |Codecov| 
 
 The ``git_sync`` module.
