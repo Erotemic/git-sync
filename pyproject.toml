@@ -1,2 +1,37 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = [ "setuptools>=41.0.1",]
+build-backend = "setuptools.build_meta"
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.xcookie]
+tags = [ "erotemic", "github", "purepy",]
+mod_name = "git_sync"
+repo_name = "git_sync"
+rel_mod_parent_dpath = "."
+os = [ "linux", "all", "win", "osx",]
+min_python = 3.6
+version = "{mod_dpath}/__init__.py::__version__"
+author = "Jon Crall"
+author_email = "erotemic@gmail.com"
+description = "The git_sync module"
+license = "Apache 2"
+dev_status = "alpha"
+
+[tool.xcookie.entry_points]
+console_scripts = [
+    "git-sync=git_sync.__main__:main",
+]
+
+[tool.pytest.ini_options]
+addopts = "-p no:doctest --xdoctest --xdoctest-style=google --ignore-glob=setup.py --ignore-glob=dev --ignore-glob=docs"
+norecursedirs = ".git ignore build __pycache__ dev _skbuild"
+filterwarnings = [ "default", "ignore:.*No cfgstr given in Cacher constructor or call.*:Warning", "ignore:.*Define the __nice__ method for.*:Warning", "ignore:.*private pytest class or function.*:Warning",]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [ "pragma: no cover", ".*  # pragma: no cover", ".*  # nocover", "def __repr__", "raise AssertionError", "raise NotImplementedError", "if 0:", "if trace is not None", "verbose = .*", "^ *raise", "^ *pass *$", "if _debug:", "if __name__ == .__main__.:", ".*if six.PY2:",]
+omit = [ "git_sync/__main__.py", "*/setup.py",]

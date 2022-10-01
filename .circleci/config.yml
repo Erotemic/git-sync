@@ -8,27 +8,49 @@
 #
 #     # Multiple files for a checksum
 #     https://discuss.circleci.com/t/cant-checksum-multiple-files-with-slashes-in-the-file-path/20667/2
+#     
+#     # Auto Cancel Redundant Builds
+#     https://circleci.com/docs/2.0/skip-build/#steps-to-enable-auto-cancel-for-pipelines-triggered-by-pushes-to-github-or-the-api
+#     https://app.circleci.com/settings/project/github/GITHUB_USER/PYPKG/advanced?return-to=https%3A%2F%2Fapp.circleci.com%2Fpipelines%2Fgithub%2FGITHUB_USER%2FPYPKG
+
+
+# Abuse YAML notation to make a heredoc. This will be ignored by the CI.
+__doc__: &__doc__
+    - | 
+
+        __doc__="""
+        Instructions for working with secretes moved to <repo>/dev/setup_secrets.sh
+        However, we no longer use CircleCI for publishing, so secrets are not necessary.
+        """ # "  # hack for vim yml syntax highlighter
+
 version: 2
 workflows:
   version: 2
   test:
     jobs:
-      - test-full-3.8
-      - test-full-3.7
-      - test-full-3.6
-      - test-full-3.5
-      - test-full-3.4
-      - test-full-2.7
+      - test_full/cp3_10-3_10-linux
+      - test_full/cp39-39-linux
+      - test_full/cp38-38-linux
+      - test_full/cp37-37m-linux
+      - test_full/cp36-36m-linux
+      #- test_full/cp35-35m-linux
+      #- test_full/cp34-34m-linux
+      #- test_full/cp27-27mu-linux
 
-      - test-minimal-3.8
-      - test-minimal-3.7
-      - test-minimal-3.6
-      - test-minimal-3.5
-      - test-minimal-3.4
-      - test-minimal-2.7
+      - test_minimal/cp3_10-3_10-linux
+      - test_minimal/cp39-39-linux
+      - test_minimal/cp38-38-linux
+      - test_minimal/cp37-37m-linux
+      - test_minimal/cp36-36m-linux
+      #- test_minimal/cp35-35m-linux
+      #- test_minimal/cp34-34m-linux
+      #- test_minimal/cp27-27mu-linux
 
-      - test-minimal-pypy3
-      - test-full-pypy3
+      - test_minimal/pypy3
+      - test_full/pypy3
+
+      - test_full/pypy3
+
 
 jobs:
 
@@ -36,74 +58,87 @@ jobs:
   # TEMPLATES
   ###########
 
-  .test-minimal-template: &test-minimal-template  
+  .common_template: &common_template
     environment:
       # Setting the python executable environ allows template reuse for pypy
       - PYTHON_EXE: python
+      - PIP_DOWNLOAD_CACHE=./pipcache
     docker:
-      - image: circleci/python
+      - image: cimg/python
+    steps:
+      - checkout
+    #working_directory: ~/{{ .Environment.CIRCLE_JOB }}
+
+  .test_minimal_template: &test_minimal_template  
+    <<: 
+        - *common_template
+    resource_class: small
     steps:
       - checkout
       # ### INITIALIZE AND CACHE REQUIREMENTS ###
       - restore_cache:
+          # NOTE: cache keys should contain the Python Version
           keys:
-          - v2-dependencies-{{ checksum "requirements/runtime.txt" }}-{{ checksum "requirements/tests.txt" }}
+          - v4-dependencies-{{ checksum "requirements/runtime.txt" }}-{{ checksum "requirements/tests.txt" }}-{{ .Environment.CIRCLE_JOB }}
       - run:
           name: install dependencies
           command: |
             $PYTHON_EXE -m venv venv || virtualenv -v venv  # first command is python3 || second is python2
             . venv/bin/activate
             # The "minimal" tests install barebones requirements
-            pip install -r requirements/tests.txt
-            pip install -r requirements/runtime.txt 
-            pip install .
+            #python setup.py bdist_wheel --universal
+            #pip install -r requirements/tests.txt
+            #pip install -r requirements/runtime.txt 
+            pip install .[tests] -v
       - save_cache:
           paths:
-            - ./venv
-          key: v2-dependencies-{{ checksum "requirements/runtime.txt" }}-{{ checksum "requirements/tests.txt" }}
+            - ./pipcache
+          key: v4-dependencies-{{ checksum "requirements/runtime.txt" }}-{{ checksum "requirements/tests.txt" }}-{{ .Environment.CIRCLE_JOB }}
       # ### RUN TESTS ###
       - run:
           name: run tests
           command: |
             . venv/bin/activate
             python run_tests.py
+            codecov
       - store_artifacts:
-          path: test-reports
-          destination: test-reports
+          path: .coverage
+          destination: .coverage
 
 
-  .test-full-template: &test-full-template  
-    environment:
-      - PYTHON_EXE: python
-    docker:
-      - image: circleci/python
+  .test_full_template: &test_full_template  
+    <<: 
+        - *common_template
+    resource_class: small
     steps:
       - checkout
       # ### INITIALIZE AND CACHE REQUIREMENTS ###
       - restore_cache:
           keys:
-          - v2-dependencies-{{ checksum "requirements/runtime.txt" }}-{{ checksum "requirements/optional.txt" }}-{{ checksum "requirements/tests.txt" }}
+          - v2-dependencies-{{ checksum "requirements/runtime.txt" }}-{{ checksum "requirements/optional.txt" }}-{{ checksum "requirements/tests.txt" }}-{{ .Environment.CIRCLE_JOB }}
       - run:
           name: install dependencies
           command: |
             $PYTHON_EXE -m venv venv || virtualenv -v venv  # first command is python3 || second is python2
             . venv/bin/activate
             # The "full" dependency install
-            pip install -r requirements.txt
-            pip install .
+            # TODO: Test the installed wheel instead of the developer install
+            # python setup.py bdist_wheel --universal
+            pip install .[all] -v
       - save_cache:
           paths:
-            - ./venv
-          key: v2-dependencies-{{ checksum "requirements/runtime.txt" }}-{{ checksum "requirements/optional.txt" }}-{{ checksum "requirements/tests.txt" }}
+            - ./pipcache
+          key: v2-dependencies-{{ checksum "requirements/runtime.txt" }}-{{ checksum "requirements/optional.txt" }}-{{ checksum "requirements/tests.txt" }}-{{ .Environment.CIRCLE_JOB }}
       # ### RUN TESTS ###
       - run:
           name: run tests
           command: |
             . venv/bin/activate
             python run_tests.py
+            codecov
       - store_artifacts:
-          path: test-reports
-          destination: test-reports
+          path: .coverage
+          destination: .coverage
 
 
   ###################################
@@ -116,105 +151,146 @@ jobs:
   # All we need to do is change the base docker image so python is the
   # version we want we can reuse everything else from the template
   
-  test-full-3.8:
-    <<: *test-full-template
+  test_full/cp3_10-3_10-linux:
+    <<: *test_full_template
     docker:
-      - image: circleci/python:3.8
-    working_directory: ~/repo-full-38
+      - image: cimg/python:3.10.0
   
-  test-full-3.7:
-    <<: *test-full-template
+  test_full/cp39-39-linux:
+    <<: *test_full_template
     docker:
-      - image: circleci/python:3.7
-    working_directory: ~/repo-full-37
-
-  test-full-3.6:
-    <<: *test-full-template
+      - image: cimg/python:3.9
+  
+  test_full/cp38-38-linux:
+    <<: *test_full_template
     docker:
-      - image: circleci/python:3.5
-    working_directory: ~/repo-full-36
-
-  test-full-3.5:
-    <<: *test-full-template
+      - image: cimg/python:3.8
+  
+  test_full/cp37-37m-linux:
+    <<: *test_full_template
     docker:
-      - image: circleci/python:3.5
-    working_directory: ~/repo-full-35
+      - image: cimg/python:3.7
 
-  test-full-3.4:
-    <<: *test-full-template
+  test_full/cp36-36m-linux:
+    <<: *test_full_template
+    docker:
+      - image: cimg/python:3.6
+
+  test_full/cp35-35m-linux:
+    <<: *test_full_template
+    docker:
+      - image: cimg/python:3.5
+
+  test_full/cp34-34m-linux:
+    <<: *test_full_template
     docker:
       - image: circleci/python:3.4
-    working_directory: ~/repo-full-34
 
-  test-full-2.7:
-    <<: *test-full-template
+  test_full/cp27-27mu-linux:
+    <<: *test_full_template
     docker:
-      - image: circleci/python:2.7
-    working_directory: ~/repo-full-27
+      - image: cimg/python:2.7
 
   # ------------
+  test_minimal/cp3_10-3_10-linux:
+    <<: *test_minimal_template
+    docker:
+      - image: cimg/python:3.10
   
-  test-minimal-3.8:
-    <<: *test-minimal-template
+  test_minimal/cp39-39-linux:
+    <<: *test_minimal_template
     docker:
-      - image: circleci/python:3.8
-    working_directory: ~/repo-minimal-38
-
-  test-minimal-3.7:
-    <<: *test-minimal-template
+      - image: cimg/python:3.9
+  
+  test_minimal/cp38-38-linux:
+    <<: *test_minimal_template
     docker:
-      - image: circleci/python:3.7
-    working_directory: ~/repo-minimal-37
+      - image: cimg/python:3.8
 
-  test-minimal-3.6:
-    <<: *test-minimal-template
+  test_minimal/cp37-37m-linux:
+    <<: *test_minimal_template
     docker:
-      - image: circleci/python:3.6
-    working_directory: ~/repo-minimal-36
+      - image: cimg/python:3.7
 
-  test-minimal-3.5:
-    <<: *test-minimal-template
+  test_minimal/cp36-36m-linux:
+    <<: *test_minimal_template
     docker:
-      - image: circleci/python:3.5
-    working_directory: ~/repo-minimal-35
+      - image: cimg/python:3.6
 
-  test-minimal-3.4:
-    <<: *test-minimal-template
+  test_minimal/cp35-35m-linux:
+    <<: *test_minimal_template
+    docker:
+      - image: cimg/python:3.5
+
+  test_minimal/cp34-34m-linux:
+    <<: *test_minimal_template
     docker:
       - image: circleci/python:3.4
-    working_directory: ~/repo-minimal-34
 
-  test-minimal-2.7:
-    <<: *test-minimal-template
+  test_minimal/cp27-27mu-linux:
+    <<: *test_minimal_template
     docker:
-      - image: circleci/python:2.7
-    working_directory: ~/repo-minimal-27
+      - image: cimg/python:2.7
 
   # --- pypy ----
 
-  test-minimal-pypy3:
-    <<: *test-minimal-template
+  test_minimal/pypy3:
+    <<: *test_minimal_template
     docker:
       - image: pypy:3
     environment:
       - PYTHON_EXE: pypy3
-    working_directory: ~/repo-minimal-pypy3
 
-  test-full-pypy3:
-    <<: *test-full-template
+  test_full/pypy3:
+    <<: *test_full_template
     docker:
       - image: pypy:3
     environment:
       - PYTHON_EXE: pypy3
-    working_directory: ~/repo-full-pypy3
-        
-  heredoc:
+ 
+
+__scratch_work__:
     docker:
       - image: pypy:3
     working_directory: ~/dev-only-not-a-real-job
     steps:
       - | 
-        __heredoc__=" 
+        __doc__=" 
+        # Run circleci scripts on a local machine
+        #
+        # Download the CircleCLI command line tool
+        mkdir -p $HOME/.local/bin
+        curl -fLSs https://raw.githubusercontent.com/CircleCI-Public/circleci-cli/master/install.sh | DESTDIR=$HOME/.local/bin bash
+
+        # Update it
+        $HOME/.local/bin/circleci update
+        $HOME/.local/bin/circleci switch
+
+        # Change to your repo directory
+        # Test to see if your config file is valid
+        $HOME/.local/bin/circleci config validate
+
+        # Execute a specific test
+        $HOME/.local/bin/circleci local execute --job test_minimal_3.9
+
+        $HOME/.local/bin/circleci local execute --config .circleci/config.yml --job test_full/cp38-38-linux
+        $HOME/.local/bin/circleci local execute --config .circleci/config.yml 
+
+        # Test GPG sign works
+        load_secrets
+        circleci local execute \
+            -e CIRCLE_CI_SECRET=$CIRCLE_CI_SECRET \
+            --job gpgsign/cp38-38-linux
+
+        # Test deploy (THIS WILL CAUSE A LIVE RUN)
+        circleci local execute \
+            -e CIRCLE_CI_SECRET=$CIRCLE_CI_SECRET \
+            -e TWINE_USERNAME=$TWINE_USERNAME \
+            -e TWINE_PASSWORD=$TWINE_PASSWORD \
+            -e PERSONAL_GITHUB_PUSH_TOKEN=$PERSONAL_GITHUB_PUSH_TOKEN \
+            --job deploy/cp38-38-linux
+
+        # Manual testing scratch work
         docker run -v $(pwd):/io -it pypy:3 bash
 
         cd /io
@@ -228,4 +304,6 @@ jobs:
 
         ./run_doctests.sh || echo "pypy failed, but this is allowed"
         ./run_tests.sh || echo "pypy failed, but this is allowed"
+
+
         "

@@ -1,7 +1,7 @@
 The git_sync Module
 ===================
 
-|Travis| |Codecov| |Pypi| |Downloads| 
+|GithubActions| |ReadTheDocs| |Pypi| |Downloads| |Codecov| 
 
 The ``git_sync`` module.
 
@@ -126,24 +126,20 @@ Similar Software
 * `Visual Studio Code <https://code.visualstudio.com/>`__ has great remote ssh and developing support. 
 
 
+.. |CircleCI| image:: https://circleci.com/gh/Erotemic/git_sync.svg?style=svg
+    :target: https://circleci.com/gh/Erotemic/git_sync
+
+.. |Codecov| image:: https://codecov.io/github/Erotemic/git_sync/badge.svg?branch=main&service=github
+   :target: https://codecov.io/github/Erotemic/git_sync?branch=main
+
 .. |Pypi| image:: https://img.shields.io/pypi/v/git_sync.svg
    :target: https://pypi.python.org/pypi/git_sync
 
 .. |Downloads| image:: https://img.shields.io/pypi/dm/git_sync.svg
    :target: https://pypistats.org/packages/git_sync
 
-.. |ReadTheDocs| image:: https://readthedocs.org/projects/git_sync/badge/?version=release
-    :target: https://git_sync.readthedocs.io/en/release/
+.. |ReadTheDocs| image:: https://readthedocs.org/projects/git_sync/badge/?version=latest
+    :target: http://git_sync.readthedocs.io/en/latest/
 
-.. # See: https://ci.appveyor.com/project/jon.crall/git_sync/settings/badges
-.. |Appveyor| image:: https://ci.appveyor.com/api/projects/status/py3s2d6tyfjc8lm3/branch/master?svg=true
-   :target: https://ci.appveyor.com/project/jon.crall/git_sync/branch/master
-
-.. |CircleCI| image:: https://circleci.com/gh/Erotemic/git_sync.svg?style=svg
-    :target: https://circleci.com/gh/Erotemic/git_sync
-
-.. |Travis| image:: https://travis-ci.org/Erotemic/git-sync.svg?branch=master
-   :target: https://travis-ci.org/Erotemic/git_sync
-
-.. |Codecov| image:: https://codecov.io/github/Erotemic/git_sync/badge.svg?branch=master&service=github
-   :target: https://codecov.io/github/Erotemic/git_sync?branch=master
+.. |GithubActions| image:: https://github.com/Erotemic/git_sync/actions/workflows/tests.yml/badge.svg?branch=main
+    :target: https://github.com/Erotemic/git_sync/actions?query=branch%3Amain
