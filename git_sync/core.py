@@ -86,7 +86,8 @@ def git_sync(host, remote=None, message='wip [skip ci]',
         ssh user@remote.com "cd ... && git pull origin ..."
     """
     cwd = getcwd()
-    home = expanduser('~')
+    if home is None:
+        home = expanduser('~')
     try:
         relcwd = relpath(cwd, home)
     except ValueError:
