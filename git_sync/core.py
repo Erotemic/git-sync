@@ -159,10 +159,16 @@ def git_sync(host, remote=None, message='wip [skip ci]',
             fi
             ''').format(branch=local_branch_name)
 
-        remote_parts += [
-            'git pull {remote}' if remote else 'git pull',
-            remote_checkout_branch_simple.replace('"', r'\"'),
-        ]
+        if host == remote:
+            remote_parts += [
+                'git reset --hard',
+                remote_checkout_branch_simple.replace('"', r'\"'),
+            ]
+        else:
+            remote_parts += [
+                'git pull {remote}' if remote else 'git pull',
+                remote_checkout_branch_simple.replace('"', r'\"'),
+            ]
 
     remote_part = ' && '.join(remote_parts)
 
