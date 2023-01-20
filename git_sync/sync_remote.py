@@ -49,7 +49,8 @@ def git_sync(host, remote=None, message='wip [skip ci]',
 
     Example:
         >>> # xdoctest: +IGNORE_WANT
-        >>> from git_sync.core import git_sync, _getcwd
+        >>> from git_sync.sync_remote import *  # NOQA
+        >>> from git_sync.sync_remote import git_sync, _getcwd
         >>> host = 'user@remote.com'
         >>> remote = 'origin'
         >>> message = 'this is the commit message'
