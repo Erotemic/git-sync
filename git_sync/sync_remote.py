@@ -137,8 +137,8 @@ def git_sync(host, remote=None, message='wip [skip ci]',
             # If the remote is also the host, then we have to do things
             # differently.
             remote_parts += [
+                remote_checkout_branch_simple.replace('"', r'\"'),
                 'git reset --hard HEAD'
-                # remote_checkout_branch_simple.replace('"', r'\"'),
             ]
         else:
             remote_parts += [
@@ -181,7 +181,7 @@ def git_sync(host, remote=None, message='wip [skip ci]',
     for part in local_parts:
         command = part.format(**kw)
         if not dry:
-            result = ub.cmd(command, verbose=2)
+            result = ub.cmd(command, verbose=3)
             retcode = result['ret']
             if command.startswith('git commit') and retcode == 1:
                 pass
