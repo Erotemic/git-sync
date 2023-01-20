@@ -16,6 +16,8 @@ def main():
                         help='Specify a custom commit message')
     parser.add_argument('--force', default=False, action='store_true',
                         help='Force push and hard reset the remote.')
+    parser.add_argument('--discover', default=False, action='store_true',
+                        help='Run the remote discovery if specified.')
 
     parser.set_defaults(
         dry=False,
@@ -25,9 +27,17 @@ def main():
     args = parser.parse_args()
     ns = args.__dict__.copy()
     ns['host'] = ns['host'][0]
+    import ubelt as ub
+    ns = ub.udict(ns)
+    discover = ns.pop('discover')
 
-    from git_sync.core import git_sync
-    git_sync(**ns)
+    if discover:
+        from git_sync import discover_remote
+        discover_kw = ns & {'host', 'dry'}
+        discover_remote.dvc_discover_ssh_remote(**discover_kw)
+    else:
+        from git_sync.core import git_sync
+        git_sync(**ns)
 
 if __name__ == '__main__':
     r"""

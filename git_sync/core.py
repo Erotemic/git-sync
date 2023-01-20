@@ -1,33 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from os.path import normpath
-from os.path import realpath
 from os.path import expanduser
 from os.path import relpath
-import os
 import ubelt as ub
-
-
-def getcwd():
-    """
-    Workaround to get the working directory without dereferencing symlinks.
-    This may not work on all systems.
-
-    References:
-        https://stackoverflow.com/questions/1542803/getcwd-dereference-symlinks
-    """
-    # TODO: use ubelt version if it lands
-    canidate1 = os.getcwd()
-    real1 = normpath(realpath(canidate1))
-
-    # test the PWD environment variable
-    candidate2 = os.getenv('PWD', None)
-    if candidate2 is not None:
-        real2 = normpath(realpath(candidate2))
-        if real1 == real2:
-            # sometimes PWD may not be updated
-            return candidate2
-    return canidate1
+from git_sync.utils import _getcwd
 
 
 def git_default_push_remote_name():
@@ -75,17 +51,17 @@ def git_sync(host, remote=None, message='wip [skip ci]',
 
     Example:
         >>> # xdoctest: +IGNORE_WANT
-        >>> from git_sync.core import git_sync, getcwd
+        >>> from git_sync.core import git_sync, _getcwd
         >>> host = 'user@remote.com'
         >>> remote = 'origin'
         >>> message = 'this is the commit message'
-        >>> home = getcwd()  # pretend the home is here for the test
+        >>> home = _getcwd()  # pretend the home is here for the test
         >>> git_sync(host, remote, message, dry=True, home=home)
         git commit -am "this is the commit message"
         git push origin
         ssh user@remote.com "cd ... && git pull origin ..."
     """
-    cwd = getcwd()
+    cwd = _getcwd()
     if home is None:
         home = expanduser('~')
     try:
