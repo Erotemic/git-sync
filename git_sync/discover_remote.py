@@ -24,6 +24,24 @@ def git_default_push_remote_name():
     return remote_name
 
 
+#####
+def _devcheck():
+    """
+    TODO: need to resolve the  receive.denyCurrentBranch problem less manually
+
+    remote: error: refusing to update checked out branch: refs/heads/updates
+    remote: error: By default, updating the current branch in a non-bare repository
+    remote: is denied, because it will make the index and work tree inconsistent
+    remote: with what you pushed, and will require 'git reset --hard' to match
+    remote: the work tree to HEAD.
+
+    On the remote:
+
+        git config --local receive.denyCurrentBranch warn
+
+    """
+
+
 def dvc_discover_ssh_remote(host, forward_ssh_agent=False,
                             dry=False):
     cwd = _getcwd()
