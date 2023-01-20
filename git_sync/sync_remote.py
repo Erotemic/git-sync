@@ -91,9 +91,7 @@ def git_sync(host, remote=None, message='wip [skip ci]',
     remote_cwd = relcwd
 
     # Build one command to execute on the remote
-    remote_parts = [
-        'cd {remote_cwd}',
-    ]
+    remote_parts = []
 
     # Get branch name from the local
     local_branch_name = ub.cmd('git rev-parse --abbrev-ref HEAD')['out'].strip()
@@ -146,47 +144,65 @@ def git_sync(host, remote=None, message='wip [skip ci]',
                 remote_checkout_branch_simple.replace('"', r'\"'),
             ]
 
-    remote_part = ' && '.join(remote_parts)
-
     # Build one comand to execute locally
     commit_command = 'git commit -am "{}"'.format(message)
 
     push_args = ['git push']
     if remote:
-        push_args.append('{remote}')
+        push_args.append(f'{remote}')
     if force:
         push_args.append('--force')
     push_command = ' '.join(push_args)
-
-    sync_command = 'ssh {ssh_flags} {host} "' + remote_part + '"'
-
-    local_parts = [
-        commit_command,
-        push_command,
-        sync_command,
-    ]
 
     ssh_flags = []
     if forward_ssh_agent:
         ssh_flags += ['-A']
     ssh_flags = ' '.join(ssh_flags)
 
-    kw = dict(
-        host=host,
-        remote_cwd=remote_cwd,
-        remote=remote,
-        ssh_flags=ssh_flags
-    )
+    sync_command = _build_remote_command(
+        ' && '.join(remote_parts), remote_cwd, ssh_flags, host)
 
-    for part in local_parts:
-        command = part.format(**kw)
+    local_commands = [
+        ('commit', commit_command),
+        ('push', push_command),
+        ('sync', sync_command),
+    ]
+
+    for part_name, command in local_commands:
         if not dry:
             result = ub.cmd(command, verbose=3)
             retcode = result['ret']
             if command.startswith('git commit') and retcode == 1:
                 pass
             elif retcode != 0:
+                if part_name == 'push':
+                    if 'updating the current branch in a non-bare repo' in result['err']:
+                        from rich.prompt import Confirm
+                        # We can handle this case if the user wants to
+                        if Confirm.ask('Do you want to force this?'):
+                            fix_command = _build_remote_command(
+                                'git config --local receive.denyCurrentBranch warn',
+                                remote_cwd, ssh_flags, host)
+                            result = ub.cmd(fix_command, verbose=3)
+                            retcode = result['ret']
+                            if retcode == 0:
+                                # Retry after running the fix
+                                result = ub.cmd(command, verbose=3)
+                                retcode = result['ret']
+                                if retcode == 0:
+                                    continue
+
                 print('git-sync cannot continue. retcode={}'.format(retcode))
                 break
         else:
             print(command)
+
+
+def _build_remote_command(command, remote_cwd, ssh_flags, host):
+    remote_parts = [
+        f'cd {remote_cwd}',
+        command
+    ]
+    remote_part = ' && '.join(remote_parts)
+    local_part = f'ssh {ssh_flags} {host} "' + remote_part + '"'
+    return local_part
